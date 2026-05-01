@@ -1,17 +1,17 @@
-# Architecture Documentation
+# Architecture Documentation - MCP Design
 
-## AI-Powered Kubernetes SRE Assistant
+## AI-Powered Kubernetes SRE Assistant (MCP Architecture)
 
-This document provides a comprehensive overview of the system architecture, components, and design decisions.
+This document provides a comprehensive overview of the MCP-based system architecture, components, and design decisions.
 
 ---
 
 ## Table of Contents
 
-1. [System Overview](#system-overview)
-2. [Architecture Layers](#architecture-layers)
-3. [Component Details](#component-details)
-4. [Data Flow](#data-flow)
+1. [MCP Architecture Overview](#mcp-architecture-overview)
+2. [MCP Servers](#mcp-servers)
+3. [Communication Flow](#communication-flow)
+4. [Data Models](#data-models)
 5. [Technology Stack](#technology-stack)
 6. [Design Patterns](#design-patterns)
 7. [Scalability & Performance](#scalability--performance)
@@ -19,706 +19,1074 @@ This document provides a comprehensive overview of the system architecture, comp
 
 ---
 
-## System Overview
+## MCP Architecture Overview
 
-The AI-Powered Kubernetes SRE Assistant is designed as a multi-layered, event-driven system that continuously monitors Kubernetes clusters, detects anomalies, and automatically remediates issues using AI-powered analysis.
+The system is built on the **Model Context Protocol (MCP)**, which provides a standardized way for AI agents to interact with external systems through specialized servers.
 
 ### High-Level Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         Kubernetes Cluster                           │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐           │
-│  │   Pods   │  │ Services │  │   Nodes  │  │  Events  │           │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────┘           │
-└─────────────────────────────────────────────────────────────────────┘
-                                 ↓
-┌─────────────────────────────────────────────────────────────────────┐
-│                      Data Collection Layer                           │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │
-│  │  Prometheus  │  │   K8s API    │  │    Loki      │             │
-│  │   Metrics    │  │   Watcher    │  │    Logs      │             │
-│  └──────────────┘  └──────────────┘  └──────────────┘             │
-└─────────────────────────────────────────────────────────────────────┘
-                                 ↓
-┌─────────────────────────────────────────────────────────────────────┐
-│                    Detection & Analysis Layer                        │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │
-│  │   Anomaly    │  │    Issue     │  │  Specialized │             │
-│  │  Detection   │  │  Classifier  │  │   Analyzers  │             │
-│  └──────────────┘  └──────────────┘  └──────────────┘             │
-└─────────────────────────────────────────────────────────────────────┘
-                                 ↓
-┌─────────────────────────────────────────────────────────────────────┐
-│                      AI Intelligence Layer                           │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │
-│  │     LLM      │  │   Context    │  │   Solution   │             │
-│  │   Analyzer   │  │  Enrichment  │  │  Generator   │             │
-│  └──────────────┘  └──────────────┘  └──────────────┘             │
-└─────────────────────────────────────────────────────────────────────┘
-                                 ↓
-┌─────────────────────────────────────────────────────────────────────┐
-│                         Action Layer                                 │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │
-│  │  Automated   │  │    Human     │  │  Validation  │             │
-│  │ Remediation  │  │    Review    │  │ & Rollback   │             │
-│  └──────────────┘  └──────────────┘  └──────────────┘             │
-└─────────────────────────────────────────────────────────────────────┘
-                                 ↓
-┌─────────────────────────────────────────────────────────────────────┐
-│                       Feedback & Learning                            │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │
-│  │  Knowledge   │  │   Learning   │  │   Metrics    │             │
-│  │     Base     │  │    System    │  │  Dashboard   │             │
-│  └──────────────┘  └──────────────┘  └──────────────┘             │
-└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                    MCP Client Layer                              │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │              AI Agent (Claude 3.5 Sonnet)                 │  │
+│  │  - Natural language understanding                         │  │
+│  │  - Context-aware decision making                          │  │
+│  │  - Multi-step reasoning                                   │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                   │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │                  Orchestrator                             │  │
+│  │  ┌────────────┐  ┌────────────┐  ┌────────────┐         │  │
+│  │  │  Workflow  │  │  Decision  │  │    MCP     │         │  │
+│  │  │   Engine   │  │   Engine   │  │   Client   │         │  │
+│  │  └────────────┘  └────────────┘  └────────────┘         │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+                    MCP Protocol (JSON-RPC 2.0)
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                      MCP Servers Layer                           │
+│                                                                   │
+│  ┌──────────────────┐  ┌──────────────────┐                    │
+│  │  K8s Monitor     │  │  Metrics         │                    │
+│  │  MCP Server      │  │  MCP Server      │                    │
+│  │                  │  │                  │                    │
+│  │ • Tools          │  │ • Tools          │                    │
+│  │ • Resources      │  │ • Resources      │                    │
+│  │ • Prompts        │  │ • Prompts        │                    │
+│  └──────────────────┘  └──────────────────┘                    │
+│                                                                   │
+│  ┌──────────────────┐  ┌──────────────────┐                    │
+│  │  Detection       │  │  Action          │                    │
+│  │  MCP Server      │  │  MCP Server      │                    │
+│  │                  │  │                  │                    │
+│  │ • Tools          │  │ • Tools          │                    │
+│  │ • Prompts        │  │ • Resources      │                    │
+│  └──────────────────┘  └──────────────────┘                    │
+│                                                                   │
+│  ┌──────────────────┐  ┌──────────────────┐                    │
+│  │  Knowledge Base  │  │  Notification    │                    │
+│  │  MCP Server      │  │  MCP Server      │                    │
+│  │                  │  │                  │                    │
+│  │ • Resources      │  │ • Tools          │                    │
+│  │ • Tools          │  │ • Prompts        │                    │
+│  └──────────────────┘  └──────────────────┘                    │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                  Infrastructure Layer                            │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
+│  │  Kubernetes  │  │  Prometheus  │  │  PostgreSQL  │         │
+│  │   Cluster    │  │    + Loki    │  │   + Redis    │         │
+│  └──────────────┘  └──────────────┘  └──────────────┘         │
+└─────────────────────────────────────────────────────────────────┘
 ```
+
+### Why MCP?
+
+1. **Modularity**: Each MCP server is independent and can be developed/deployed separately
+2. **Extensibility**: Easy to add new capabilities by creating new MCP servers
+3. **Standardization**: Uses standard MCP protocol for all communications
+4. **AI-Native**: Designed for AI agents to interact with external systems
+5. **Type Safety**: Strong typing through MCP schema definitions
+6. **Discoverability**: AI agents can discover available tools and resources
 
 ---
 
-## Architecture Layers
+## MCP Servers
 
-### 1. Data Collection Layer
+### 1. K8s Monitor MCP Server
 
-**Purpose**: Gather comprehensive data from the Kubernetes cluster
+**Purpose**: Provides real-time access to Kubernetes cluster state
 
-**Components**:
+#### Tools
 
-#### 1.1 Metrics Collector
-- **Technology**: Prometheus + Metrics Server
-- **Responsibility**: Collect resource utilization metrics
-- **Collection Interval**: 15 seconds
-- **Metrics Collected**:
-  - CPU usage (per pod, node, container)
-  - Memory usage and limits
-  - Network I/O
-  - Disk I/O
-  - Request rates and latencies
-  - Custom application metrics
-
-#### 1.2 Event Watcher
-- **Technology**: Kubernetes Informers (client-go)
-- **Responsibility**: Real-time event streaming
-- **Events Monitored**:
-  - Pod lifecycle events (Created, Started, Failed, Killed)
-  - Node events (NotReady, OutOfDisk, MemoryPressure)
-  - Deployment events (ScalingReplicaSet, FailedCreate)
-  - ConfigMap/Secret changes
-  - Resource quota violations
-
-#### 1.3 Log Aggregator
-- **Technology**: Fluentd/Fluent Bit + Loki
-- **Responsibility**: Centralized log collection and indexing
-- **Log Sources**:
-  - Container stdout/stderr
-  - Kubernetes audit logs
-  - System logs
-  - Application logs
-
-**Data Flow**:
-```
-K8s Cluster → Collectors → Time-Series DB (Prometheus)
-                        → Event Stream (Kafka/Redis)
-                        → Log Storage (Loki/Elasticsearch)
-```
-
----
-
-### 2. Detection & Analysis Layer
-
-**Purpose**: Identify anomalies and classify issues
-
-**Components**:
-
-#### 2.1 Anomaly Detection Engine
-- **Technology**: Python (scikit-learn, statsmodels)
-- **Algorithms**:
-  - **Statistical Methods**:
-    - Moving averages and standard deviations
-    - Seasonal decomposition
-    - Z-score analysis
-  - **Machine Learning**:
-    - Isolation Forest for outlier detection
-    - LSTM for time-series prediction
-    - Autoencoders for pattern recognition
-
-#### 2.2 Issue Classifier
-- **Technology**: Rule-based + ML classification
-- **Classification Categories**:
-  - Crash/Restart issues
-  - Performance degradation
-  - Resource exhaustion
-  - Configuration errors
-  - Network issues
-  - Security incidents
-
-#### 2.3 Specialized Analyzers
-
-**Crash Analyzer**:
-```go
-type CrashAnalyzer struct {
-    restartThreshold  int
-    exitCodePatterns  map[int]string
-    backoffDetector   *BackoffDetector
-}
-
-func (ca *CrashAnalyzer) Analyze(pod *v1.Pod) *CrashReport {
-    // Analyze restart count
-    // Check exit codes
-    // Detect CrashLoopBackOff
-    // Extract error messages from logs
+```typescript
+interface K8sMonitorTools {
+  // Watch pod status changes
+  watch_pods(namespace?: string, labelSelector?: string): Stream<PodEvent>
+  
+  // Get cluster events
+  get_events(namespace?: string, fieldSelector?: string): Event[]
+  
+  // Fetch container logs
+  fetch_logs(
+    namespace: string,
+    podName: string,
+    container?: string,
+    lines?: number
+  ): string
+  
+  // Describe resource
+  describe_resource(
+    kind: string,
+    namespace: string,
+    name: string
+  ): ResourceDescription
+  
+  // List resources
+  list_resources(
+    kind: string,
+    namespace?: string,
+    labelSelector?: string
+  ): Resource[]
 }
 ```
 
-**Latency Analyzer**:
+#### Resources
+
+```typescript
+interface K8sMonitorResources {
+  // Pod details
+  "pods://{namespace}/{pod-name}": PodResource
+  
+  // Cluster events
+  "events://{namespace}": EventsResource
+  
+  // Container logs
+  "logs://{namespace}/{pod-name}/{container}": LogsResource
+  
+  // Resource definitions
+  "resources://{kind}/{namespace}/{name}": ResourceDefinition
+}
+```
+
+#### Implementation
+
 ```python
-class LatencyAnalyzer:
+# mcp-servers/k8s-monitor/server.py
+from mcp.server import Server
+from mcp.types import Tool, Resource
+from kubernetes import client, config, watch
+
+class K8sMonitorServer:
     def __init__(self):
-        self.baseline_percentiles = {}
-        self.alert_threshold = 2.0  # 2x baseline
+        self.server = Server("k8s-monitor")
+        config.load_kube_config()
+        self.v1 = client.CoreV1Api()
+        self.apps_v1 = client.AppsV1Api()
+        
+        self.register_tools()
+        self.register_resources()
     
-    def analyze(self, service_name: str, metrics: dict) -> LatencyReport:
-        # Compare current p50, p95, p99 with baseline
-        # Identify slow endpoints
-        # Correlate with resource usage
-        # Check for downstream dependencies
-```
-
-**Memory Leak Detector**:
-```python
-class MemoryLeakDetector:
-    def __init__(self):
-        self.growth_threshold = 0.1  # 10% per hour
-        self.observation_window = 6  # hours
-    
-    def detect(self, pod_name: str, memory_series: TimeSeries) -> LeakReport:
-        # Calculate memory growth rate
-        # Detect linear/exponential growth
-        # Identify leak patterns
-        # Estimate time to OOM
-```
-
----
-
-### 3. AI Intelligence Layer
-
-**Purpose**: Provide intelligent root cause analysis and solution generation
-
-**Components**:
-
-#### 3.1 Context Enrichment Service
-```python
-class ContextEnricher:
-    def enrich_issue(self, issue: Issue) -> EnrichedContext:
-        context = {
-            'logs': self.get_recent_logs(issue.pod, lines=1000),
-            'metrics': self.get_metric_window(issue.pod, duration='15m'),
-            'events': self.get_related_events(issue.pod),
-            'config': self.get_pod_config(issue.pod),
-            'dependencies': self.get_service_dependencies(issue.service),
-            'history': self.query_similar_incidents(issue)
-        }
-        return EnrichedContext(context)
-```
-
-#### 3.2 LLM Root Cause Analyzer
-```python
-class LLMAnalyzer:
-    def __init__(self, llm_client):
-        self.llm = llm_client
-        self.prompt_template = self.load_prompt_template()
-    
-    def analyze_root_cause(self, enriched_context: EnrichedContext) -> RootCauseAnalysis:
-        prompt = self.build_prompt(enriched_context)
-        
-        response = self.llm.complete(
-            prompt=prompt,
-            temperature=0.2,  # Low temperature for consistency
-            max_tokens=2000
-        )
-        
-        return self.parse_analysis(response)
-```
-
-**Prompt Structure**:
-```
-System Context:
-- Cluster: production-us-east-1
-- Namespace: payment-service
-- Resource Limits: CPU: 2 cores, Memory: 4Gi
-
-Issue Symptoms:
-- Pod restarted 5 times in last 10 minutes
-- Exit code: 137 (OOMKilled)
-- Memory usage before crash: 3.9Gi (97.5% of limit)
-
-Recent Logs:
-[Last 100 lines of logs]
-
-Metrics History:
-[15-minute metric window showing memory growth]
-
-Similar Past Incidents:
-[3 similar incidents with resolutions]
-
-Task: Analyze the root cause of this issue and explain:
-1. What happened?
-2. Why did it happen?
-3. What are the contributing factors?
-4. What is the immediate impact?
-```
-
-#### 3.3 Solution Generator
-```python
-class SolutionGenerator:
-    def generate_solutions(self, root_cause: RootCauseAnalysis) -> List[Solution]:
-        solutions = []
-        
-        # Generate multiple solution options
-        for strategy in self.solution_strategies:
-            solution = strategy.generate(root_cause)
-            solution.confidence = self.calculate_confidence(solution, root_cause)
-            solution.risk_level = self.assess_risk(solution)
-            solution.estimated_impact = self.estimate_impact(solution)
-            solutions.append(solution)
-        
-        # Rank solutions by confidence and safety
-        return sorted(solutions, key=lambda s: (s.confidence, -s.risk_level))
-```
-
-**Solution Structure**:
-```python
-@dataclass
-class Solution:
-    id: str
-    description: str
-    actions: List[Action]
-    confidence: float  # 0.0 to 1.0
-    risk_level: RiskLevel  # LOW, MEDIUM, HIGH
-    estimated_impact: str
-    rollback_procedure: List[Action]
-    validation_checks: List[Check]
-```
-
-#### 3.4 Knowledge Base
-```python
-class KnowledgeBase:
-    def __init__(self):
-        self.vector_db = ChromaDB()  # For semantic search
-        self.sql_db = PostgreSQL()   # For structured data
-    
-    def store_incident(self, incident: Incident, resolution: Resolution):
-        # Store in SQL for structured queries
-        self.sql_db.insert_incident(incident, resolution)
-        
-        # Create embedding for semantic search
-        embedding = self.create_embedding(incident)
-        self.vector_db.add(embedding, incident.id)
-    
-    def find_similar_incidents(self, current_issue: Issue, limit=5) -> List[Incident]:
-        # Semantic search using embeddings
-        query_embedding = self.create_embedding(current_issue)
-        similar_ids = self.vector_db.query(query_embedding, limit=limit)
-        
-        return [self.sql_db.get_incident(id) for id in similar_ids]
-```
-
----
-
-### 4. Action Layer
-
-**Purpose**: Execute remediation actions safely and efficiently
-
-**Components**:
-
-#### 4.1 Action Controller
-```go
-type ActionController struct {
-    k8sClient     kubernetes.Interface
-    dryRunMode    bool
-    rateLimiter   *RateLimiter
-    circuitBreaker *CircuitBreaker
-}
-
-func (ac *ActionController) ExecuteAction(action Action) (*ActionResult, error) {
-    // Check if auto-fix is enabled
-    if !ac.shouldAutoFix(action) {
-        return ac.queueForReview(action)
-    }
-    
-    // Rate limiting
-    if !ac.rateLimiter.Allow(action.Type) {
-        return nil, ErrRateLimitExceeded
-    }
-    
-    // Circuit breaker check
-    if ac.circuitBreaker.IsOpen(action.Type) {
-        return nil, ErrCircuitBreakerOpen
-    }
-    
-    // Dry run first
-    if err := ac.dryRun(action); err != nil {
-        return nil, fmt.Errorf("dry run failed: %w", err)
-    }
-    
-    // Execute action
-    result, err := ac.execute(action)
-    if err != nil {
-        ac.circuitBreaker.RecordFailure(action.Type)
-        return nil, err
-    }
-    
-    // Validate result
-    if err := ac.validate(result); err != nil {
-        ac.rollback(action)
-        return nil, fmt.Errorf("validation failed: %w", err)
-    }
-    
-    ac.circuitBreaker.RecordSuccess(action.Type)
-    return result, nil
-}
-```
-
-#### 4.2 Auto-Fix Decision Engine
-```python
-class AutoFixDecisionEngine:
-    def should_auto_fix(self, solution: Solution, issue: Issue) -> Decision:
-        # Confidence threshold
-        if solution.confidence < 0.90:
-            return Decision.HUMAN_REVIEW
-        
-        # Risk assessment
-        if solution.risk_level == RiskLevel.HIGH:
-            return Decision.HUMAN_REVIEW
-        
-        # Critical service check
-        if issue.service in self.critical_services:
-            if solution.confidence < 0.95:
-                return Decision.HUMAN_REVIEW
-        
-        # Time-based restrictions
-        if self.is_business_hours() and solution.requires_restart:
-            return Decision.HUMAN_REVIEW
-        
-        # Historical success rate
-        success_rate = self.get_historical_success_rate(solution.type)
-        if success_rate < 0.85:
-            return Decision.HUMAN_REVIEW
-        
-        return Decision.AUTO_FIX
-```
-
-**Decision Matrix**:
-
-| Confidence | Risk Level | Critical Service | Time | Action |
-|-----------|-----------|------------------|------|--------|
-| >95% | LOW | Yes | Any | Auto-fix |
-| >90% | LOW | No | Any | Auto-fix |
-| >90% | MEDIUM | No | Off-hours | Auto-fix |
-| >90% | MEDIUM | No | Business hours | Review |
-| >90% | HIGH | Any | Any | Review |
-| 70-90% | Any | Any | Any | Review |
-| <70% | Any | Any | Any | Escalate |
-
-#### 4.3 Validation & Rollback System
-```python
-class ValidationSystem:
-    def validate_fix(self, action: Action, timeout: int = 300) -> ValidationResult:
-        start_time = time.time()
-        
-        while time.time() - start_time < timeout:
-            # Check pod health
-            if not self.is_pod_healthy(action.target_pod):
-                return ValidationResult.FAILED
+    def register_tools(self):
+        @self.server.tool()
+        async def watch_pods(
+            namespace: str = "default",
+            label_selector: str = ""
+        ):
+            """Watch pod status changes in real-time"""
+            w = watch.Watch()
+            events = []
             
-            # Check metrics improvement
-            metrics = self.get_current_metrics(action.target_pod)
-            if self.metrics_improved(metrics, action.baseline_metrics):
-                return ValidationResult.SUCCESS
+            for event in w.stream(
+                self.v1.list_namespaced_pod,
+                namespace=namespace,
+                label_selector=label_selector,
+                timeout_seconds=10
+            ):
+                events.append({
+                    "type": event["type"],
+                    "pod": event["object"].metadata.name,
+                    "phase": event["object"].status.phase,
+                    "reason": event["object"].status.reason
+                })
             
-            time.sleep(10)
+            return events
         
-        return ValidationResult.TIMEOUT
-
-class RollbackSystem:
-    def rollback(self, action: Action) -> RollbackResult:
-        # Get previous state
-        previous_state = self.state_store.get(action.target)
-        
-        # Apply rollback
-        try:
-            self.k8s_client.apply(previous_state)
-            
-            # Wait for rollback to complete
-            self.wait_for_rollback(action.target)
-            
-            return RollbackResult.SUCCESS
-        except Exception as e:
-            return RollbackResult.FAILED
-```
-
----
-
-### 5. Feedback & Learning Layer
-
-**Purpose**: Continuously improve system performance
-
-**Components**:
-
-#### 5.1 Learning System
-```python
-class LearningSystem:
-    def update_models(self, incident: Incident, outcome: Outcome):
-        # Update confidence model
-        self.confidence_model.update(
-            features=incident.features,
-            actual_success=outcome.success
-        )
-        
-        # Update anomaly detection thresholds
-        if outcome.false_positive:
-            self.anomaly_detector.adjust_threshold(
-                metric=incident.metric,
-                direction='increase'
+        @self.server.tool()
+        async def fetch_logs(
+            namespace: str,
+            pod_name: str,
+            container: str = None,
+            lines: int = 1000
+        ):
+            """Fetch container logs"""
+            return self.v1.read_namespaced_pod_log(
+                name=pod_name,
+                namespace=namespace,
+                container=container,
+                tail_lines=lines
             )
-        
-        # Update solution effectiveness
-        self.solution_ranker.update_score(
-            solution_type=incident.solution.type,
-            success=outcome.success
-        )
-```
-
-#### 5.2 Metrics & Observability
-```yaml
-Metrics Tracked:
-  Detection:
-    - issues_detected_total
-    - false_positive_rate
-    - mean_time_to_detect (MTTD)
-  
-  Analysis:
-    - llm_analysis_duration
-    - confidence_score_distribution
-    - root_cause_accuracy
-  
-  Remediation:
-    - auto_fix_attempts_total
-    - auto_fix_success_rate
-    - mean_time_to_resolution (MTTR)
-    - rollback_rate
-  
-  Learning:
-    - knowledge_base_size
-    - model_accuracy_improvement
-    - similar_incident_match_rate
+    
+    def register_resources(self):
+        @self.server.resource("pods://{namespace}/{pod_name}")
+        async def get_pod(namespace: str, pod_name: str):
+            """Get pod details"""
+            pod = self.v1.read_namespaced_pod(
+                name=pod_name,
+                namespace=namespace
+            )
+            return {
+                "name": pod.metadata.name,
+                "namespace": pod.metadata.namespace,
+                "status": pod.status.phase,
+                "containers": [c.name for c in pod.spec.containers],
+                "restarts": sum(
+                    cs.restart_count 
+                    for cs in pod.status.container_statuses or []
+                )
+            }
 ```
 
 ---
 
-## Data Flow
+### 2. Metrics MCP Server
 
-### Complete Issue Resolution Flow
+**Purpose**: Provides access to cluster metrics and time-series data
 
-```
-1. Detection Phase
-   ├─ Metrics Collector detects anomaly
-   ├─ Event Watcher captures pod restart
-   └─ Triggers Issue Detection
+#### Tools
 
-2. Analysis Phase
-   ├─ Issue Classifier categorizes as "OOMKill"
-   ├─ Context Enricher gathers:
-   │  ├─ Last 1000 log lines
-   │  ├─ 15-minute metric window
-   │  ├─ Related events
-   │  └─ Similar historical incidents
-   └─ LLM Analyzer determines root cause
-
-3. Solution Phase
-   ├─ Solution Generator creates options:
-   │  ├─ Option 1: Increase memory limit (confidence: 92%)
-   │  ├─ Option 2: Add memory profiling (confidence: 75%)
-   │  └─ Option 3: Horizontal scaling (confidence: 68%)
-   └─ Ranks by confidence and risk
-
-4. Decision Phase
-   ├─ Auto-Fix Engine evaluates:
-   │  ├─ Confidence: 92% (>90% threshold) ✓
-   │  ├─ Risk: LOW ✓
-   │  ├─ Critical service: No ✓
-   │  └─ Decision: AUTO-FIX
-   └─ Proceeds to execution
-
-5. Execution Phase
-   ├─ Rate limiter check: PASS
-   ├─ Circuit breaker check: CLOSED
-   ├─ Dry run: SUCCESS
-   ├─ Apply patch: memory 2Gi → 4Gi
-   └─ Trigger rolling update
-
-6. Validation Phase
-   ├─ Monitor pod health: HEALTHY
-   ├─ Check memory usage: 2.1Gi (52% of limit)
-   ├─ Verify no restarts: 0 restarts in 5 minutes
-   └─ Validation: SUCCESS
-
-7. Learning Phase
-   ├─ Store incident in knowledge base
-   ├─ Update confidence model
-   ├─ Record solution effectiveness
-   └─ Generate metrics
-```
-
----
-
-## Technology Stack Details
-
-### Backend Services
-
-#### Watcher Service (Go)
-```go
-// Main watcher implementation
-type WatcherService struct {
-    k8sClient     kubernetes.Interface
-    metricsClient promclient.API
-    eventChan     chan Event
-    metricsChan   chan Metric
-}
-
-func (ws *WatcherService) Start(ctx context.Context) error {
-    // Start Kubernetes informers
-    go ws.watchPods(ctx)
-    go ws.watchNodes(ctx)
-    go ws.watchEvents(ctx)
-    
-    // Start metrics collection
-    go ws.collectMetrics(ctx)
-    
-    return nil
+```typescript
+interface MetricsTools {
+  // Query Prometheus metrics
+  query_metrics(
+    query: string,
+    time?: string
+  ): MetricResult[]
+  
+  // Get time series data
+  get_timeseries(
+    metric: string,
+    start: string,
+    end: string,
+    step?: string
+  ): TimeSeries
+  
+  // Analyze metric trends
+  analyze_trends(
+    metric: string,
+    duration: string
+  ): TrendAnalysis
+  
+  // Detect anomalies
+  detect_anomalies(
+    metric: string,
+    threshold: number
+  ): Anomaly[]
 }
 ```
 
-#### AI Service (Python)
+#### Implementation
+
 ```python
-# FastAPI service for AI operations
-from fastapi import FastAPI
-from langchain import LLMChain
+# mcp-servers/metrics/server.py
+from mcp.server import Server
+from prometheus_api_client import PrometheusConnect
 
-app = FastAPI()
-
-@app.post("/analyze")
-async def analyze_issue(issue: Issue) -> Analysis:
-    # Enrich context
-    context = context_enricher.enrich(issue)
+class MetricsServer:
+    def __init__(self, prometheus_url: str):
+        self.server = Server("metrics")
+        self.prom = PrometheusConnect(url=prometheus_url)
+        self.register_tools()
     
-    # LLM analysis
-    analysis = llm_analyzer.analyze(context)
-    
-    # Generate solutions
-    solutions = solution_generator.generate(analysis)
-    
-    return Analysis(
-        root_cause=analysis,
-        solutions=solutions
-    )
+    def register_tools(self):
+        @self.server.tool()
+        async def query_metrics(query: str, time: str = None):
+            """Query Prometheus metrics"""
+            if time:
+                result = self.prom.custom_query(query=query, params={"time": time})
+            else:
+                result = self.prom.custom_query(query=query)
+            
+            return [
+                {
+                    "metric": r["metric"],
+                    "value": float(r["value"][1]),
+                    "timestamp": r["value"][0]
+                }
+                for r in result
+            ]
+        
+        @self.server.tool()
+        async def get_timeseries(
+            metric: str,
+            start: str,
+            end: str,
+            step: str = "15s"
+        ):
+            """Get time series data"""
+            result = self.prom.custom_query_range(
+                query=metric,
+                start_time=start,
+                end_time=end,
+                step=step
+            )
+            
+            return {
+                "metric": result[0]["metric"],
+                "values": [
+                    {"timestamp": v[0], "value": float(v[1])}
+                    for v in result[0]["values"]
+                ]
+            }
+        
+        @self.server.tool()
+        async def analyze_trends(metric: str, duration: str):
+            """Analyze metric trends"""
+            # Get recent data
+            data = await self.get_timeseries(
+                metric=metric,
+                start=f"-{duration}",
+                end="now",
+                step="1m"
+            )
+            
+            values = [v["value"] for v in data["values"]]
+            
+            # Calculate statistics
+            mean = sum(values) / len(values)
+            variance = sum((x - mean) ** 2 for x in values) / len(values)
+            std_dev = variance ** 0.5
+            
+            # Detect trend
+            if values[-1] > mean + 2 * std_dev:
+                trend = "increasing"
+            elif values[-1] < mean - 2 * std_dev:
+                trend = "decreasing"
+            else:
+                trend = "stable"
+            
+            return {
+                "metric": metric,
+                "trend": trend,
+                "mean": mean,
+                "std_dev": std_dev,
+                "current": values[-1],
+                "min": min(values),
+                "max": max(values)
+            }
 ```
 
-### Data Storage
+---
 
-#### PostgreSQL Schema
-```sql
--- Incidents table
-CREATE TABLE incidents (
-    id UUID PRIMARY KEY,
-    cluster_id VARCHAR(255),
-    namespace VARCHAR(255),
-    pod_name VARCHAR(255),
-    issue_type VARCHAR(100),
-    detected_at TIMESTAMP,
-    resolved_at TIMESTAMP,
-    root_cause TEXT,
-    solution_applied TEXT,
-    confidence_score FLOAT,
-    auto_fixed BOOLEAN,
-    success BOOLEAN,
-    created_at TIMESTAMP DEFAULT NOW()
-);
+### 3. Detection MCP Server
 
--- Solutions table
-CREATE TABLE solutions (
-    id UUID PRIMARY KEY,
-    incident_id UUID REFERENCES incidents(id),
-    solution_type VARCHAR(100),
-    description TEXT,
-    actions JSONB,
-    confidence FLOAT,
-    risk_level VARCHAR(20),
-    applied BOOLEAN,
-    success BOOLEAN,
-    created_at TIMESTAMP DEFAULT NOW()
-);
+**Purpose**: Analyzes data to detect and classify issues
 
--- Metrics table
-CREATE TABLE metrics_history (
-    id BIGSERIAL PRIMARY KEY,
-    pod_name VARCHAR(255),
-    metric_name VARCHAR(100),
-    metric_value FLOAT,
-    timestamp TIMESTAMP,
-    INDEX idx_pod_metric_time (pod_name, metric_name, timestamp)
-);
+#### Tools
+
+```typescript
+interface DetectionTools {
+  // Detect anomalies
+  detect_anomaly(
+    data: MetricData,
+    threshold: number
+  ): AnomalyResult
+  
+  // Classify issue type
+  classify_issue(
+    context: IssueContext
+  ): IssueClassification
+  
+  // Analyze patterns
+  analyze_pattern(
+    events: Event[],
+    logs: string[]
+  ): PatternAnalysis
+  
+  // Correlate events
+  correlate_events(
+    events: Event[],
+    timeWindow: string
+  ): CorrelatedEvents
+}
 ```
+
+#### Prompts
+
+```typescript
+interface DetectionPrompts {
+  // Analyze crash patterns
+  "analyze_crash": {
+    arguments: {
+      exitCode: number,
+      logs: string[],
+      events: Event[]
+    }
+  }
+  
+  // Analyze OOM kills
+  "analyze_oom": {
+    arguments: {
+      memoryUsage: number,
+      memoryLimit: number,
+      trend: TrendData
+    }
+  }
+  
+  // Analyze latency issues
+  "analyze_latency": {
+    arguments: {
+      currentLatency: number,
+      baselineLatency: number,
+      metrics: MetricData
+    }
+  }
+}
+```
+
+#### Implementation
+
+```python
+# mcp-servers/detection/server.py
+from mcp.server import Server
+import numpy as np
+from sklearn.ensemble import IsolationForest
+
+class DetectionServer:
+    def __init__(self):
+        self.server = Server("detection")
+        self.anomaly_detector = IsolationForest(contamination=0.1)
+        self.register_tools()
+        self.register_prompts()
+    
+    def register_tools(self):
+        @self.server.tool()
+        async def detect_anomaly(
+            data: list[float],
+            threshold: float = 2.0
+        ):
+            """Detect anomalies using statistical methods"""
+            arr = np.array(data)
+            mean = np.mean(arr)
+            std = np.std(arr)
+            
+            anomalies = []
+            for i, value in enumerate(data):
+                z_score = abs((value - mean) / std)
+                if z_score > threshold:
+                    anomalies.append({
+                        "index": i,
+                        "value": value,
+                        "z_score": z_score,
+                        "severity": "high" if z_score > 3 else "medium"
+                    })
+            
+            return {
+                "anomalies_found": len(anomalies),
+                "anomalies": anomalies,
+                "baseline_mean": mean,
+                "baseline_std": std
+            }
+        
+        @self.server.tool()
+        async def classify_issue(context: dict):
+            """Classify issue type based on context"""
+            events = context.get("events", [])
+            metrics = context.get("metrics", {})
+            logs = context.get("logs", [])
+            
+            # Check for OOMKill
+            if any(e.get("reason") == "OOMKilling" for e in events):
+                return {
+                    "type": "OOMKill",
+                    "confidence": 0.95,
+                    "severity": "high",
+                    "description": "Pod killed due to out of memory"
+                }
+            
+            # Check for CrashLoopBackOff
+            if any("CrashLoop" in e.get("reason", "") for e in events):
+                return {
+                    "type": "CrashLoop",
+                    "confidence": 0.90,
+                    "severity": "high",
+                    "description": "Pod in crash loop"
+                }
+            
+            # Check for high latency
+            if metrics.get("p95_latency", 0) > metrics.get("baseline_latency", 0) * 2:
+                return {
+                    "type": "HighLatency",
+                    "confidence": 0.85,
+                    "severity": "medium",
+                    "description": "Service latency significantly elevated"
+                }
+            
+            return {
+                "type": "Unknown",
+                "confidence": 0.5,
+                "severity": "low",
+                "description": "Unable to classify issue"
+            }
+    
+    def register_prompts(self):
+        @self.server.prompt("analyze_crash")
+        async def analyze_crash_prompt(
+            exit_code: int,
+            logs: list[str],
+            events: list[dict]
+        ):
+            """Generate prompt for crash analysis"""
+            return f"""Analyze this container crash:
+
+Exit Code: {exit_code}
+
+Recent Events:
+{chr(10).join(f"- {e['type']}: {e['reason']}" for e in events)}
+
+Last 50 Log Lines:
+{chr(10).join(logs[-50:])}
+
+Provide:
+1. Root cause of the crash
+2. Contributing factors
+3. Recommended fixes
+"""
+```
+
+---
+
+### 4. Action MCP Server
+
+**Purpose**: Executes remediation actions on the cluster
+
+#### Tools
+
+```typescript
+interface ActionTools {
+  // Patch Kubernetes resource
+  patch_resource(
+    kind: string,
+    namespace: string,
+    name: string,
+    patch: object,
+    dryRun?: boolean
+  ): ActionResult
+  
+  // Scale workload
+  scale_workload(
+    kind: string,
+    namespace: string,
+    name: string,
+    replicas: number
+  ): ActionResult
+  
+  // Restart pod
+  restart_pod(
+    namespace: string,
+    podName: string
+  ): ActionResult
+  
+  // Rollback deployment
+  rollback_deployment(
+    namespace: string,
+    name: string,
+    revision?: number
+  ): ActionResult
+}
+```
+
+#### Implementation
+
+```python
+# mcp-servers/actions/server.py
+from mcp.server import Server
+from kubernetes import client, config
+import json
+
+class ActionServer:
+    def __init__(self, dry_run: bool = False):
+        self.server = Server("actions")
+        self.dry_run = dry_run
+        config.load_kube_config()
+        self.v1 = client.CoreV1Api()
+        self.apps_v1 = client.AppsV1Api()
+        self.register_tools()
+    
+    def register_tools(self):
+        @self.server.tool()
+        async def patch_resource(
+            kind: str,
+            namespace: str,
+            name: str,
+            patch: dict,
+            dry_run: bool = None
+        ):
+            """Patch a Kubernetes resource"""
+            use_dry_run = dry_run if dry_run is not None else self.dry_run
+            dry_run_param = "All" if use_dry_run else None
+            
+            try:
+                if kind.lower() == "deployment":
+                    result = self.apps_v1.patch_namespaced_deployment(
+                        name=name,
+                        namespace=namespace,
+                        body=patch,
+                        dry_run=dry_run_param
+                    )
+                elif kind.lower() == "pod":
+                    result = self.v1.patch_namespaced_pod(
+                        name=name,
+                        namespace=namespace,
+                        body=patch,
+                        dry_run=dry_run_param
+                    )
+                else:
+                    return {
+                        "success": False,
+                        "error": f"Unsupported resource kind: {kind}"
+                    }
+                
+                return {
+                    "success": True,
+                    "dry_run": use_dry_run,
+                    "resource": f"{kind}/{namespace}/{name}",
+                    "patch_applied": patch
+                }
+            except Exception as e:
+                return {
+                    "success": False,
+                    "error": str(e)
+                }
+        
+        @self.server.tool()
+        async def scale_workload(
+            kind: str,
+            namespace: str,
+            name: str,
+            replicas: int
+        ):
+            """Scale a workload"""
+            try:
+                if kind.lower() == "deployment":
+                    # Get current deployment
+                    deployment = self.apps_v1.read_namespaced_deployment(
+                        name=name,
+                        namespace=namespace
+                    )
+                    
+                    # Update replicas
+                    deployment.spec.replicas = replicas
+                    
+                    # Apply update
+                    result = self.apps_v1.patch_namespaced_deployment_scale(
+                        name=name,
+                        namespace=namespace,
+                        body={"spec": {"replicas": replicas}}
+                    )
+                    
+                    return {
+                        "success": True,
+                        "resource": f"{kind}/{namespace}/{name}",
+                        "replicas": replicas
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "error": f"Scaling not supported for {kind}"
+                    }
+            except Exception as e:
+                return {
+                    "success": False,
+                    "error": str(e)
+                }
+```
+
+---
+
+### 5. Knowledge Base MCP Server
+
+**Purpose**: Stores and retrieves historical incident data
+
+#### Resources
+
+```typescript
+interface KnowledgeBaseResources {
+  // Historical incidents
+  "incidents://": IncidentList
+  "incidents://{id}": Incident
+  
+  // Known solutions
+  "solutions://": SolutionList
+  "solutions://{id}": Solution
+  
+  // Issue patterns
+  "patterns://": PatternList
+  "patterns://{type}": Pattern
+}
+```
+
+#### Tools
+
+```typescript
+interface KnowledgeBaseTools {
+  // Search similar incidents
+  search_similar(
+    issue: IssueDescription,
+    limit?: number
+  ): Incident[]
+  
+  // Store incident
+  store_incident(
+    incident: Incident,
+    solution: Solution
+  ): StorageResult
+  
+  // Get solution
+  get_solution(
+    issueType: string,
+    context: object
+  ): Solution
+  
+  // Update effectiveness
+  update_effectiveness(
+    solutionId: string,
+    success: boolean
+  ): UpdateResult
+}
+```
+
+#### Implementation
+
+```python
+# mcp-servers/knowledge-base/server.py
+from mcp.server import Server
+import chromadb
+from datetime import datetime
+
+class KnowledgeBaseServer:
+    def __init__(self, db_url: str):
+        self.server = Server("knowledge-base")
+        self.chroma = chromadb.Client()
+        self.collection = self.chroma.create_collection("incidents")
+        self.register_resources()
+        self.register_tools()
+    
+    def register_tools(self):
+        @self.server.tool()
+        async def search_similar(
+            issue: dict,
+            limit: int = 5
+        ):
+            """Search for similar incidents"""
+            # Create query from issue description
+            query_text = f"{issue['type']} {issue['description']}"
+            
+            # Search in vector database
+            results = self.collection.query(
+                query_texts=[query_text],
+                n_results=limit
+            )
+            
+            return [
+                {
+                    "id": results["ids"][0][i],
+                    "incident": results["documents"][0][i],
+                    "similarity": results["distances"][0][i],
+                    "metadata": results["metadatas"][0][i]
+                }
+                for i in range(len(results["ids"][0]))
+            ]
+        
+        @self.server.tool()
+        async def store_incident(
+            incident: dict,
+            solution: dict
+        ):
+            """Store incident and solution"""
+            # Create document
+            doc_text = f"""
+            Type: {incident['type']}
+            Description: {incident['description']}
+            Root Cause: {incident['root_cause']}
+            Solution: {solution['description']}
+            """
+            
+            # Store in vector database
+            self.collection.add(
+                documents=[doc_text],
+                metadatas=[{
+                    "type": incident["type"],
+                    "severity": incident["severity"],
+                    "solution_id": solution["id"],
+                    "success": solution.get("success", True),
+                    "timestamp": datetime.now().isoformat()
+                }],
+                ids=[incident["id"]]
+            )
+            
+            return {
+                "success": True,
+                "incident_id": incident["id"]
+            }
+```
+
+---
+
+### 6. Notification MCP Server
+
+**Purpose**: Sends notifications to various channels
+
+#### Tools
+
+```typescript
+interface NotificationTools {
+  // Send Slack notification
+  send_slack(
+    message: string,
+    channel?: string,
+    severity?: string
+  ): NotificationResult
+  
+  // Send email
+  send_email(
+    to: string[],
+    subject: string,
+    body: string
+  ): NotificationResult
+  
+  // Create ticket
+  create_ticket(
+    title: string,
+    description: string,
+    priority: string
+  ): TicketResult
+  
+  // Send webhook
+  send_webhook(
+    url: string,
+    payload: object
+  ): WebhookResult
+}
+```
+
+---
+
+## Communication Flow
+
+### MCP Protocol Flow
+
+```mermaid
+sequenceDiagram
+    participant Client as MCP Client
+    participant Server as MCP Server
+    
+    Client->>Server: initialize
+    Server-->>Client: capabilities
+    
+    Client->>Server: tools/list
+    Server-->>Client: available tools
+    
+    Client->>Server: resources/list
+    Server-->>Client: available resources
+    
+    Client->>Server: tools/call (tool_name, arguments)
+    Server-->>Client: result
+    
+    Client->>Server: resources/read (uri)
+    Server-->>Client: resource content
+```
+
+### End-to-End Issue Resolution
+
+```mermaid
+sequenceDiagram
+    participant Orch as Orchestrator
+    participant Claude as Claude AI
+    participant K8s as K8s Monitor
+    participant Metrics as Metrics Server
+    participant Detect as Detection Server
+    participant KB as Knowledge Base
+    participant Action as Action Server
+    participant Notify as Notification
+    
+    Orch->>K8s: watch_pods()
+    K8s-->>Orch: Pod OOMKilled event
+    
+    Orch->>Metrics: query_metrics(pod, "memory")
+    Metrics-->>Orch: Memory: 3.9Gi/4Gi
+    
+    Orch->>K8s: fetch_logs(pod)
+    K8s-->>Orch: Last 1000 lines
+    
+    Orch->>Detect: classify_issue(context)
+    Detect-->>Orch: OOMKill, 95% confidence
+    
+    Orch->>KB: search_similar(issue)
+    KB-->>Orch: 3 similar incidents
+    
+    Orch->>Claude: Analyze with context
+    Note over Claude: AI analyzes all data<br/>and generates solution
+    Claude-->>Orch: Increase memory to 6Gi
+    
+    Orch->>Action: patch_resource(deployment, memory: 6Gi, dry_run: true)
+    Action-->>Orch: Dry run successful
+    
+    Orch->>Action: patch_resource(deployment, memory: 6Gi)
+    Action-->>Orch: Patch applied
+    
+    Orch->>K8s: watch_pods()
+    K8s-->>Orch: Pod healthy
+    
+    Orch->>KB: store_incident(incident, solution)
+    KB-->>Orch: Stored
+    
+    Orch->>Notify: send_slack("OOMKill auto-fixed")
+    Notify-->>Orch: Notification sent
+```
+
+---
+
+## Data Models
+
+### MCP Message Format
+
+```typescript
+// Tool Call
+interface ToolCall {
+  jsonrpc: "2.0"
+  id: string | number
+  method: "tools/call"
+  params: {
+    name: string
+    arguments: Record<string, unknown>
+  }
+}
+
+// Tool Response
+interface ToolResponse {
+  jsonrpc: "2.0"
+  id: string | number
+  result: {
+    content: Array<{
+      type: "text" | "image" | "resource"
+      text?: string
+      data?: string
+      uri?: string
+    }>
+  }
+}
+
+// Resource Read
+interface ResourceRead {
+  jsonrpc: "2.0"
+  id: string | number
+  method: "resources/read"
+  params: {
+    uri: string
+  }
+}
+```
+
+### Domain Models
+
+```typescript
+interface Incident {
+  id: string
+  type: string
+  namespace: string
+  podName: string
+  severity: "low" | "medium" | "high" | "critical"
+  detectedAt: string
+  resolvedAt?: string
+  rootCause: string
+  solution?: Solution
+  autoFixed: boolean
+  confidence: number
+}
+
+interface Solution {
+  id: string
+  description: string
+  actions: Action[]
+  confidence: number
+  riskLevel: "low" | "medium" | "high"
+  rollbackProcedure: Action[]
+  validationChecks: string[]
+}
+
+interface Action {
+  type: string
+  target: string
+  parameters: Record<string, unknown>
+  dryRun: boolean
+}
+```
+
+---
+
+## Technology Stack
+
+### MCP Infrastructure
+- **MCP SDK**: Python (`mcp` package) or TypeScript (`@modelcontextprotocol/sdk`)
+- **Transport**: stdio (local), SSE (HTTP), WebSocket (real-time)
+- **Protocol**: JSON-RPC 2.0
+- **Serialization**: JSON
+
+### AI/ML
+- **LLM**: Claude 3.5 Sonnet (Anthropic)
+- **Embeddings**: OpenAI text-embedding-3-small
+- **Vector DB**: ChromaDB or Pinecone
+- **ML Libraries**: scikit-learn, numpy
+
+### Backend
+- **MCP Servers**: Python 3.11+ with FastMCP
+- **Orchestrator**: Python with asyncio
+- **API**: FastAPI (optional REST interface)
+
+### Infrastructure
+- **Kubernetes**: client-go (Go) or kubernetes-python
+- **Monitoring**: Prometheus, Loki, Grafana
+- **Database**: PostgreSQL 15+, Redis 7+
+- **Storage**: S3-compatible (MinIO)
 
 ---
 
 ## Design Patterns
 
-### 1. Observer Pattern
-Used for event watching and notification system.
+### 1. MCP Server Pattern
+Each server is independent and follows MCP specification:
+- Exposes tools, resources, and prompts
+- Handles initialization and capability negotiation
+- Implements error handling and logging
 
-### 2. Strategy Pattern
-Used for different solution generation strategies.
+### 2. Orchestrator Pattern
+Central orchestrator coordinates between MCP servers:
+- Manages workflow execution
+- Makes decisions based on AI analysis
+- Handles error recovery
 
-### 3. Circuit Breaker Pattern
-Prevents cascading failures in auto-fix system.
+### 3. Event-Driven Pattern
+System reacts to cluster events:
+- Kubernetes events trigger workflows
+- Metrics anomalies trigger analysis
+- Actions trigger validation
 
-### 4. Command Pattern
-Used for action execution and rollback.
-
-### 5. Repository Pattern
-Used for data access abstraction.
+### 4. Circuit Breaker Pattern
+Prevents cascading failures:
+- Tracks action success/failure rates
+- Opens circuit after threshold failures
+- Gradually recovers with half-open state
 
 ---
 
 ## Scalability & Performance
 
 ### Horizontal Scaling
-- **Watcher Service**: Multiple replicas with leader election
-- **AI Service**: Stateless, can scale to N replicas
-- **Action Controller**: Single active instance with standby
+- **MCP Servers**: Stateless, can run multiple instances
+- **Orchestrator**: Single active with standby for HA
+- **Load Balancing**: Round-robin across server instances
 
 ### Performance Optimizations
 - **Caching**: Redis for frequently accessed data
-- **Batching**: Batch metric queries to reduce API calls
-- **Async Processing**: Non-blocking I/O for all operations
-- **Connection Pooling**: Reuse database connections
+- **Batching**: Batch similar operations
+- **Async I/O**: Non-blocking operations throughout
+- **Connection Pooling**: Reuse connections to K8s API
 
 ### Resource Requirements
 ```yaml
-Watcher Service:
-  CPU: 500m - 2 cores
-  Memory: 1Gi - 4Gi
-  Replicas: 2-5
+MCP Servers (each):
+  CPU: 200m - 500m
+  Memory: 256Mi - 512Mi
+  Replicas: 2-3
 
-AI Service:
-  CPU: 1 - 4 cores
-  Memory: 2Gi - 8Gi
-  Replicas: 2-10
-
-Action Controller:
+Orchestrator:
   CPU: 500m - 1 core
-  Memory: 512Mi - 2Gi
+  Memory: 512Mi - 1Gi
   Replicas: 1 (active) + 1 (standby)
 ```
 
@@ -726,40 +1094,34 @@ Action Controller:
 
 ## Security Architecture
 
-### Authentication & Authorization
-- **Service Accounts**: Kubernetes RBAC for cluster access
-- **API Keys**: Encrypted storage for LLM API keys
-- **mTLS**: Service-to-service communication
+### MCP Security
+- **Transport Security**: TLS for remote connections
+- **Authentication**: Token-based auth for MCP servers
+- **Authorization**: Role-based access control
+- **Audit**: All tool calls logged
 
-### RBAC Permissions
-```yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: k8s-assistant
-rules:
-- apiGroups: [""]
-  resources: ["pods", "events", "configmaps"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: ["apps"]
-  resources: ["deployments", "replicasets"]
-  verbs: ["get", "list", "watch", "patch"]
-- apiGroups: [""]
-  resources: ["pods/log"]
-  verbs: ["get"]
-```
+### Kubernetes Security
+- **RBAC**: Minimal permissions per server
+- **Service Accounts**: Dedicated SA for each server
+- **Network Policies**: Restrict inter-pod communication
+- **Secrets**: Encrypted at rest and in transit
 
-### Audit Logging
-All actions are logged with:
-- Timestamp
-- User/Service account
-- Action type
-- Target resource
-- Result (success/failure)
-- Reason
+### AI Security
+- **Prompt Injection**: Input validation and sanitization
+- **Output Validation**: Verify AI-generated actions
+- **Rate Limiting**: Prevent abuse of AI APIs
+- **Audit Trail**: Log all AI decisions
 
 ---
 
 ## Conclusion
 
-This architecture provides a robust, scalable, and intelligent system for autonomous Kubernetes cluster management. The multi-layered approach ensures separation of concerns, while the AI-powered analysis enables sophisticated root cause detection and remediation.
+The MCP-based architecture provides a modular, extensible, and AI-native design for the Kubernetes SRE assistant. The use of standardized MCP protocol enables:
+
+- Easy addition of new capabilities
+- Clear separation of concerns
+- Type-safe interactions
+- AI agent discoverability
+- Production-ready reliability
+
+This architecture is designed to scale from small clusters to large enterprise deployments while maintaining simplicity and maintainability.

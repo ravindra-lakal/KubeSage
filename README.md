@@ -1,285 +1,421 @@
-# AI-Powered Kubernetes SRE Assistant
+# AI-Powered Kubernetes SRE Assistant (MCP Architecture)
 
-An intelligent, autonomous Site Reliability Engineering (SRE) assistant that monitors your Kubernetes cluster, detects issues, explains root causes, and automatically applies fixes.
+An intelligent, autonomous Site Reliability Engineering (SRE) assistant built on **Model Context Protocol (MCP)** that monitors your Kubernetes cluster, detects issues, explains root causes, and automatically applies fixes.
 
 ## 🎯 Overview
 
-This AI-powered SRE assistant combines real-time Kubernetes monitoring with advanced AI/ML capabilities to provide:
+This AI-powered SRE assistant leverages the **Model Context Protocol (MCP)** to provide a modular, extensible architecture where specialized MCP servers handle different aspects of cluster monitoring and remediation.
 
-- **Continuous Monitoring**: Watches cluster health, metrics, logs, and events
-- **Intelligent Detection**: Identifies crashes, high latency, memory leaks, and resource issues
-- **Root Cause Analysis**: Uses LLM to explain why issues occurred
-- **Automated Remediation**: Suggests and auto-applies fixes with confidence scoring
-- **Learning System**: Improves over time by learning from past incidents
+### Key Features
 
-## 🚀 Key Features
+- **MCP-Based Architecture**: Modular design using MCP servers for extensibility
+- **Continuous Monitoring**: Watches cluster health via dedicated MCP servers
+- **Intelligent Detection**: AI-powered issue detection through MCP tools
+- **Root Cause Analysis**: LLM-based analysis using MCP context
+- **Automated Remediation**: Safe auto-fixes with MCP action servers
+- **Learning System**: Continuous improvement through MCP knowledge servers
 
-### 1. Multi-Layer Detection
-- **Crash Detection**: Pod restarts, CrashLoopBackOff, exit code analysis
-- **Latency Monitoring**: Request duration tracking (p50, p95, p99)
-- **Memory Leak Detection**: Gradual memory growth pattern analysis
-- **Resource Exhaustion**: CPU, memory, and disk usage monitoring
-
-### 2. AI-Powered Analysis
-- **Context Enrichment**: Collects logs, metrics, events, and historical data
-- **LLM Integration**: Uses large language models for root cause analysis
-- **Solution Generation**: Creates ranked fix options with confidence scores
-- **Knowledge Base**: Learns from historical incidents and solutions
-
-### 3. Safe Automation
-- **Confidence Scoring**: Multi-level confidence thresholds
-  - High (>90%): Auto-fix safe operations
-  - Medium (70-90%): Suggest with approval
-  - Low (<70%): Escalate to human
-- **Safety Mechanisms**: Dry-run validation, automatic rollback, rate limiting
-- **Human-in-the-Loop**: Review queue for complex or risky operations
-
-### 4. Continuous Learning
-- Tracks fix success rates
-- Updates confidence models
-- Improves detection accuracy
-- Builds solution library
-
-## 📊 Architecture
+## 🏗️ MCP Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Data Collection Layer                     │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │   Metrics    │  │    Events    │  │     Logs     │      │
-│  │  Collector   │  │   Watcher    │  │  Aggregator  │      │
-│  └──────────────┘  └──────────────┘  └──────────────┘      │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│                 Detection & Analysis Layer                   │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │   Anomaly    │  │    Issue     │  │  Specialized │      │
-│  │  Detection   │  │  Classifier  │  │   Analyzers  │      │
-│  └──────────────┘  └──────────────┘  └──────────────┘      │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│                   AI Intelligence Layer                      │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │     LLM      │  │   Context    │  │   Solution   │      │
-│  │   Analyzer   │  │  Enrichment  │  │  Generator   │      │
-│  └──────────────┘  └──────────────┘  └──────────────┘      │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│                       Action Layer                           │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │  Automated   │  │    Human     │  │  Validation  │      │
-│  │ Remediation  │  │    Review    │  │ & Monitoring │      │
-│  └──────────────┘  └──────────────┘  └──────────────┘      │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                     MCP Client (Orchestrator)                    │
+│                                                                   │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │   AI Agent   │  │  Workflow    │  │   Decision   │          │
+│  │   (Claude)   │  │   Engine     │  │    Engine    │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓ MCP Protocol
+┌─────────────────────────────────────────────────────────────────┐
+│                        MCP Servers Layer                         │
+│                                                                   │
+│  ┌──────────────────┐  ┌──────────────────┐                    │
+│  │  K8s Monitor     │  │  Metrics Server  │                    │
+│  │  MCP Server      │  │  MCP Server      │                    │
+│  │                  │  │                  │                    │
+│  │ Tools:           │  │ Tools:           │                    │
+│  │ - watch_pods     │  │ - query_metrics  │                    │
+│  │ - get_events     │  │ - get_timeseries │                    │
+│  │ - fetch_logs     │  │ - analyze_trends │                    │
+│  └──────────────────┘  └──────────────────┘                    │
+│                                                                   │
+│  ┌──────────────────┐  ┌──────────────────┐                    │
+│  │  Detection       │  │  Action          │                    │
+│  │  MCP Server      │  │  MCP Server      │                    │
+│  │                  │  │                  │                    │
+│  │ Tools:           │  │ Tools:           │                    │
+│  │ - detect_anomaly │  │ - patch_resource │                    │
+│  │ - classify_issue │  │ - scale_workload │                    │
+│  │ - analyze_pattern│  │ - restart_pod    │                    │
+│  └──────────────────┘  └──────────────────┘                    │
+│                                                                   │
+│  ┌──────────────────┐  ┌──────────────────┐                    │
+│  │  Knowledge Base  │  │  Notification    │                    │
+│  │  MCP Server      │  │  MCP Server      │                    │
+│  │                  │  │                  │                    │
+│  │ Resources:       │  │ Tools:           │                    │
+│  │ - incidents      │  │ - send_slack     │                    │
+│  │ - solutions      │  │ - send_email     │                    │
+│  │ - patterns       │  │ - create_ticket  │                    │
+│  └──────────────────┘  └──────────────────┘                    │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                    Kubernetes Cluster                            │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## 🚀 MCP Servers
+
+### 1. K8s Monitor MCP Server
+**Purpose**: Provides real-time access to Kubernetes cluster state
+
+**Tools**:
+- `watch_pods`: Stream pod status changes
+- `get_events`: Retrieve cluster events
+- `fetch_logs`: Get container logs
+- `describe_resource`: Get detailed resource information
+
+**Resources**:
+- `pods://namespace/pod-name`: Pod details
+- `events://namespace`: Cluster events
+- `logs://namespace/pod-name/container`: Container logs
+
+### 2. Metrics MCP Server
+**Purpose**: Provides access to cluster metrics and time-series data
+
+**Tools**:
+- `query_metrics`: Query Prometheus metrics
+- `get_timeseries`: Get metric time series
+- `analyze_trends`: Analyze metric trends
+- `detect_anomalies`: Statistical anomaly detection
+
+**Resources**:
+- `metrics://pod/memory`: Memory metrics
+- `metrics://pod/cpu`: CPU metrics
+- `metrics://service/latency`: Latency metrics
+
+### 3. Detection MCP Server
+**Purpose**: Analyzes data to detect and classify issues
+
+**Tools**:
+- `detect_anomaly`: Detect anomalous behavior
+- `classify_issue`: Classify issue type
+- `analyze_pattern`: Pattern recognition
+- `correlate_events`: Correlate related events
+
+**Prompts**:
+- `analyze_crash`: Analyze crash patterns
+- `analyze_oom`: Analyze OOM kills
+- `analyze_latency`: Analyze latency issues
+
+### 4. Action MCP Server
+**Purpose**: Executes remediation actions on the cluster
+
+**Tools**:
+- `patch_resource`: Update Kubernetes resources
+- `scale_workload`: Scale deployments/statefulsets
+- `restart_pod`: Restart pods
+- `rollback_deployment`: Rollback to previous version
+- `dry_run`: Test action without applying
+
+### 5. Knowledge Base MCP Server
+**Purpose**: Stores and retrieves historical incident data
+
+**Resources**:
+- `incidents://`: Historical incidents
+- `solutions://`: Known solutions
+- `patterns://`: Issue patterns
+
+**Tools**:
+- `search_similar`: Find similar incidents
+- `store_incident`: Store new incident
+- `get_solution`: Retrieve solution
+- `update_effectiveness`: Update solution effectiveness
+
+### 6. Notification MCP Server
+**Purpose**: Sends notifications to various channels
+
+**Tools**:
+- `send_slack`: Send Slack notification
+- `send_email`: Send email alert
+- `create_ticket`: Create PagerDuty/Jira ticket
+- `send_webhook`: Send custom webhook
+
+## 📊 MCP Workflow
+
+### Issue Detection & Resolution Flow
+
+```mermaid
+sequenceDiagram
+    participant Client as MCP Client
+    participant Monitor as K8s Monitor Server
+    participant Metrics as Metrics Server
+    participant Detect as Detection Server
+    participant KB as Knowledge Base Server
+    participant Action as Action Server
+    participant Notify as Notification Server
+    
+    Client->>Monitor: watch_pods()
+    Monitor-->>Client: Pod crashed (OOMKilled)
+    
+    Client->>Metrics: query_metrics(pod, "memory")
+    Metrics-->>Client: Memory usage: 3.9Gi/4Gi
+    
+    Client->>Monitor: fetch_logs(pod)
+    Monitor-->>Client: Last 1000 log lines
+    
+    Client->>Detect: classify_issue(context)
+    Detect-->>Client: Issue: OOMKill, Confidence: 95%
+    
+    Client->>KB: search_similar(issue)
+    KB-->>Client: 3 similar incidents found
+    
+    Note over Client: AI Agent analyzes with LLM
+    
+    Client->>Action: dry_run(patch_memory, "4Gi→6Gi")
+    Action-->>Client: Dry run successful
+    
+    Client->>Action: patch_resource(deployment, memory: 6Gi)
+    Action-->>Client: Patch applied
+    
+    Client->>Monitor: watch_pods()
+    Monitor-->>Client: Pod healthy
+    
+    Client->>KB: store_incident(incident, solution)
+    KB-->>Client: Stored
+    
+    Client->>Notify: send_slack(incident_resolved)
+    Notify-->>Client: Notification sent
 ```
 
 ## 🛠️ Technology Stack
 
-### Infrastructure
-- **Kubernetes**: 1.28+
-- **Helm**: Chart-based deployment
-- **Docker**: Container runtime
-
-### Monitoring
-- **Prometheus**: Metrics collection and storage
-- **Grafana**: Visualization and dashboards
-- **Loki**: Log aggregation and querying
-- **Alertmanager**: Alert routing and management
-
-### AI/ML
-- **LangChain**: LLM orchestration framework
-- **OpenAI/Claude**: Root cause analysis and solution generation
-- **ChromaDB/Pinecone**: Vector database for semantic search
-- **scikit-learn**: Anomaly detection algorithms
+### MCP Infrastructure
+- **MCP SDK**: Python/TypeScript MCP SDK
+- **Transport**: stdio, SSE, or WebSocket
+- **Protocol**: JSON-RPC 2.0
 
 ### Backend Services
-- **Go**: Kubernetes controllers and operators
-- **Python**: AI/ML services and data processing
-- **FastAPI**: REST API services
-- **gRPC**: Inter-service communication
+- **MCP Servers**: Python (FastMCP) or TypeScript
+- **Orchestrator**: Python with Claude API
+- **Database**: PostgreSQL + Vector DB (Chroma/Pinecone)
+- **Cache**: Redis
 
-### Data Storage
-- **PostgreSQL**: Structured data and incident history
-- **Redis**: Caching and message queues
-- **S3/MinIO**: Log archives and backups
+### Kubernetes Integration
+- **Client**: kubernetes-python / client-go
+- **Monitoring**: Prometheus, Loki
+- **Metrics**: kube-state-metrics
+
+### AI/ML
+- **LLM**: Claude 3.5 Sonnet (via MCP)
+- **Embeddings**: OpenAI embeddings
+- **Vector Search**: ChromaDB
 
 ## 📁 Project Structure
 
 ```
-k8s-assistant/
-├── README.md                 # This file
-├── ARCHITECTURE.md          # Detailed architecture documentation
-├── WORKFLOW.md              # Workflow diagrams and explanations
-├── IMPLEMENTATION.md        # Implementation guide
-├── DEPLOYMENT.md            # Deployment instructions
-├── docs/                    # Additional documentation
-│   ├── api/                # API documentation
-│   ├── configuration/      # Configuration guides
-│   ├── examples/           # Example scenarios
-│   └── troubleshooting/    # Troubleshooting guides
-├── src/                     # Source code
-│   ├── watcher/            # Kubernetes watcher service
-│   ├── detector/           # Issue detection engine
-│   ├── ai-service/         # AI analysis service
-│   ├── action-controller/  # Remediation controller
-│   └── api/                # REST API service
-├── charts/                  # Helm charts
-├── config/                  # Configuration files
-├── tests/                   # Test suites
-└── scripts/                 # Utility scripts
+k8s-assistant-mcp/
+├── README.md
+├── ARCHITECTURE.md
+├── mcp-servers/
+│   ├── k8s-monitor/
+│   │   ├── server.py
+│   │   ├── tools.py
+│   │   └── resources.py
+│   ├── metrics/
+│   │   ├── server.py
+│   │   └── tools.py
+│   ├── detection/
+│   │   ├── server.py
+│   │   ├── tools.py
+│   │   └── prompts.py
+│   ├── actions/
+│   │   ├── server.py
+│   │   └── tools.py
+│   ├── knowledge-base/
+│   │   ├── server.py
+│   │   ├── resources.py
+│   │   └── tools.py
+│   └── notifications/
+│       ├── server.py
+│       └── tools.py
+├── orchestrator/
+│   ├── main.py
+│   ├── workflow_engine.py
+│   ├── decision_engine.py
+│   └── mcp_client.py
+├── config/
+│   ├── mcp-servers.json
+│   ├── config.yaml
+│   └── prompts/
+├── charts/
+│   └── k8s-assistant-mcp/
+├── docs/
+│   ├── mcp-servers/
+│   ├── api/
+│   ├── configuration/
+│   └── examples/
+└── tests/
 ```
 
 ## 🚦 Quick Start
 
 ### Prerequisites
 - Kubernetes cluster (1.28+)
-- kubectl configured
-- Helm 3.x
-- Access to LLM API (OpenAI/Claude) or local LLM
+- Python 3.11+
+- Claude API key
+- MCP SDK installed
 
 ### Installation
 
-1. **Clone the repository**
+1. **Install MCP SDK**
 ```bash
-git clone https://github.com/your-org/k8s-assistant.git
-cd k8s-assistant
+pip install mcp anthropic
 ```
 
-2. **Configure settings**
+2. **Clone Repository**
 ```bash
-cp config/config.example.yaml config/config.yaml
-# Edit config.yaml with your settings
+git clone https://github.com/your-org/k8s-assistant-mcp.git
+cd k8s-assistant-mcp
 ```
 
-3. **Deploy with Helm**
+3. **Configure MCP Servers**
 ```bash
-helm install k8s-assistant ./charts/k8s-assistant \
-  --namespace k8s-assistant \
-  --create-namespace \
-  --values config/values.yaml
+cp config/mcp-servers.example.json config/mcp-servers.json
+# Edit with your settings
 ```
 
-4. **Verify installation**
+4. **Start MCP Servers**
 ```bash
-kubectl get pods -n k8s-assistant
+# Start all MCP servers
+./scripts/start-mcp-servers.sh
+
+# Or start individually
+python mcp-servers/k8s-monitor/server.py
+python mcp-servers/metrics/server.py
+python mcp-servers/detection/server.py
+python mcp-servers/actions/server.py
+python mcp-servers/knowledge-base/server.py
+python mcp-servers/notifications/server.py
 ```
 
-## 📖 Documentation
+5. **Start Orchestrator**
+```bash
+python orchestrator/main.py
+```
 
-- **[Architecture](ARCHITECTURE.md)**: Detailed system design and components
-- **[Workflow](WORKFLOW.md)**: Complete workflow diagrams and explanations
-- **[Implementation](IMPLEMENTATION.md)**: Technical implementation guide
-- **[Deployment](DEPLOYMENT.md)**: Deployment and configuration instructions
-- **[API Documentation](docs/api/)**: REST API reference
-- **[Configuration Guide](docs/configuration/)**: Configuration options
-- **[Examples](docs/examples/)**: Real-world usage examples
+### MCP Server Configuration
 
-## 🔍 How It Works
-
-### 1. Continuous Monitoring
-The system continuously monitors your Kubernetes cluster:
-- Collects metrics every 15 seconds
-- Watches events in real-time
-- Aggregates logs from all pods
-
-### 2. Issue Detection
-When anomalies are detected:
-- Statistical analysis identifies deviations
-- Pattern matching recognizes known issues
-- Machine learning detects unusual behavior
-
-### 3. AI Analysis
-For each detected issue:
-- Collects relevant context (logs, metrics, events)
-- Queries knowledge base for similar incidents
-- Uses LLM to analyze root cause
-- Generates multiple solution options
-
-### 4. Automated Action
-Based on confidence and risk:
-- **High confidence + Low risk**: Auto-apply fix
-- **Medium confidence**: Suggest to SRE team
-- **Low confidence + High risk**: Escalate for review
-
-### 5. Validation & Learning
-After applying fixes:
-- Monitors metrics to validate success
-- Rolls back if issues persist
-- Updates knowledge base with outcomes
-- Improves future detection and remediation
+```json
+{
+  "mcpServers": {
+    "k8s-monitor": {
+      "command": "python",
+      "args": ["mcp-servers/k8s-monitor/server.py"],
+      "env": {
+        "KUBECONFIG": "/path/to/kubeconfig"
+      }
+    },
+    "metrics": {
+      "command": "python",
+      "args": ["mcp-servers/metrics/server.py"],
+      "env": {
+        "PROMETHEUS_URL": "http://prometheus:9090"
+      }
+    },
+    "detection": {
+      "command": "python",
+      "args": ["mcp-servers/detection/server.py"]
+    },
+    "actions": {
+      "command": "python",
+      "args": ["mcp-servers/actions/server.py"],
+      "env": {
+        "KUBECONFIG": "/path/to/kubeconfig",
+        "DRY_RUN": "false"
+      }
+    },
+    "knowledge-base": {
+      "command": "python",
+      "args": ["mcp-servers/knowledge-base/server.py"],
+      "env": {
+        "DATABASE_URL": "postgresql://localhost/k8s_assistant"
+      }
+    },
+    "notifications": {
+      "command": "python",
+      "args": ["mcp-servers/notifications/server.py"],
+      "env": {
+        "SLACK_WEBHOOK": "https://hooks.slack.com/..."
+      }
+    }
+  }
+}
+```
 
 ## 🎯 Use Cases
 
-### Scenario 1: Pod Crash (OOMKilled)
-```
-Detection → Pod restarted with exit code 137
-Analysis → Memory limit too low for workload spike
-Solution → Increase memory limit from 2Gi to 4Gi
-Action → Auto-applied (confidence: 92%)
-Result → Pod stable, no further crashes
+### Scenario 1: OOMKill Auto-Remediation
+
+```python
+# The MCP orchestrator handles this automatically:
+
+# 1. K8s Monitor detects OOMKill event
+event = await k8s_monitor.watch_pods()
+
+# 2. Metrics Server provides memory data
+metrics = await metrics_server.query_metrics(pod, "memory")
+
+# 3. Detection Server classifies issue
+issue = await detection_server.classify_issue(event, metrics)
+
+# 4. Knowledge Base finds similar incidents
+similar = await kb_server.search_similar(issue)
+
+# 5. AI Agent (Claude) analyzes and decides
+analysis = await claude.analyze(issue, metrics, similar)
+
+# 6. Action Server applies fix
+result = await action_server.patch_resource(
+    deployment, 
+    {"memory": "6Gi"}
+)
+
+# 7. Notification Server alerts team
+await notify_server.send_slack(f"Auto-fixed OOMKill: {result}")
 ```
 
-### Scenario 2: High Latency
-```
-Detection → P95 latency increased from 100ms to 2000ms
-Analysis → Database connection pool exhausted
-Solution → Increase max connections from 50 to 100
-Action → Suggested for review (confidence: 78%)
-Result → SRE approved, latency normalized
-```
+## 🔒 Security
 
-### Scenario 3: Memory Leak
-```
-Detection → Gradual memory growth over 6 hours
-Analysis → Memory not released after processing requests
-Solution → Restart pod + add memory profiling
-Action → Auto-applied restart (confidence: 85%)
-Result → Memory usage normalized, profiling enabled
-```
+- **MCP Transport Security**: TLS for remote connections
+- **Authentication**: Token-based auth for MCP servers
+- **RBAC**: Kubernetes RBAC for cluster access
+- **Secrets**: Encrypted storage for API keys
+- **Audit**: All actions logged
 
-## 🔒 Security Considerations
+## 📊 Monitoring
 
-- **RBAC**: Minimal permissions for cluster access
-- **Secrets Management**: Encrypted storage for API keys
-- **Audit Logging**: All actions logged for compliance
-- **Rate Limiting**: Prevents excessive auto-fixes
-- **Dry-Run Mode**: Test fixes before applying
-- **Manual Override**: SRE can disable auto-fix anytime
-
-## 📊 Metrics & Monitoring
-
-The assistant provides comprehensive metrics:
-- Issues detected per hour/day
-- Auto-fix success rate
-- Mean time to detection (MTTD)
-- Mean time to resolution (MTTR)
-- Confidence score distribution
-- Human intervention rate
+- **MCP Server Health**: Health checks for all servers
+- **Tool Usage Metrics**: Track tool invocations
+- **Performance**: Latency and throughput metrics
+- **Errors**: Error rates and types
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+See [CONTRIBUTORS.md](CONTRIBUTORS.md) for contribution guidelines.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Kubernetes community for excellent tooling
-- OpenAI/Anthropic for LLM capabilities
-- Prometheus and Grafana teams for monitoring stack
+MIT License - see [LICENSE](LICENSE) file
 
 ## 📞 Support
 
 - **Documentation**: [docs/](docs/)
-- **Issues**: [GitHub Issues](https://github.com/your-org/k8s-assistant/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-org/k8s-assistant/discussions)
-- **Slack**: [Join our community](https://slack.k8s-assistant.io)
+- **Issues**: [GitHub Issues](https://github.com/your-org/k8s-assistant-mcp/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/your-org/k8s-assistant-mcp/discussions)
 
 ---
 
-**Built with ❤️ for SRE teams everywhere**
+**Built with ❤️ using Model Context Protocol (MCP)**
