@@ -66,6 +66,63 @@ AI/ML:
   - Anthropic API key OR
   - Local LLM (Ollama, LM Studio)
   - ChromaDB or Pinecone for vector storage
+
+### Python Package Requirements
+
+The project includes comprehensive requirements.txt files for all components:
+
+**Main Requirements** (`requirements.txt`):
+- All dependencies in one file for complete installation
+- Includes MCP SDK, AI libraries, Kubernetes client, databases, monitoring tools
+
+**Component-Specific Requirements**:
+
+1. **Orchestrator** (`orchestrator/requirements.txt`):
+   - MCP SDK, Anthropic/OpenAI, Kubernetes client
+   - FastAPI, workflow management, monitoring
+   - 68 total dependencies
+
+2. **K8s Monitor Server** (`mcp-servers/k8s-monitor/requirements.txt`):
+   - MCP SDK, Kubernetes client
+   - Async libraries, logging
+   - 20 total dependencies
+
+3. **Metrics Server** (`mcp-servers/metrics/requirements.txt`):
+   - MCP SDK, Prometheus client
+   - Data processing (numpy, pandas, scikit-learn)
+   - 29 total dependencies
+
+4. **Detection Server** (`mcp-servers/detection/requirements.txt`):
+   - MCP SDK, ML libraries
+   - Anomaly detection (pyod), pattern recognition
+   - 32 total dependencies
+
+5. **Actions Server** (`mcp-servers/actions/requirements.txt`):
+   - MCP SDK, Kubernetes client
+   - Rate limiting, circuit breaker, validation
+   - 30 total dependencies
+
+6. **Knowledge Base Server** (`mcp-servers/knowledge-base/requirements.txt`):
+   - MCP SDK, PostgreSQL, ChromaDB
+   - Vector embeddings, sentence transformers
+   - 39 total dependencies
+
+7. **Notifications Server** (`mcp-servers/notifications/requirements.txt`):
+   - MCP SDK, Slack/Telegram SDKs
+   - Email support, template engine
+   - 39 total dependencies
+
+**Installation**:
+```bash
+# Install all dependencies
+pip install -r requirements.txt
+
+# Or install per component
+pip install -r orchestrator/requirements.txt
+pip install -r mcp-servers/k8s-monitor/requirements.txt
+# ... etc
+```
+
 ```
 
 ---

@@ -262,26 +262,40 @@ k8s-assistant-mcp/
 
 ## 🚦 Quick Start
 
+> **📖 For detailed installation instructions, see [INSTALL.md](INSTALL.md)**
+
 ### Prerequisites
 - Kubernetes cluster (1.28+)
 - Python 3.11+
-- Claude API key
-- MCP SDK installed
+- Claude API key or OpenAI API key
+- kubectl configured
 
-### Installation
+### Quick Installation
 
-1. **Install MCP SDK**
-```bash
-pip install mcp anthropic
-```
-
-2. **Clone Repository**
+1. **Clone Repository**
 ```bash
 git clone https://github.com/your-org/k8s-assistant-mcp.git
 cd k8s-assistant-mcp
 ```
 
-3. **Configure MCP Servers**
+2. **Install Dependencies**
+```bash
+# Install all dependencies
+pip install -r requirements.txt
+```
+
+3. **Set Environment Variables**
+```bash
+# Set your API key
+export ANTHROPIC_API_KEY="your-api-key-here"
+# OR
+export OPENAI_API_KEY="your-api-key-here"
+
+# Set kubeconfig (if not default)
+export KUBECONFIG=~/.kube/config
+```
+
+4. **Configure MCP Servers**
 ```bash
 cp config/mcp-servers.example.json config/mcp-servers.json
 # Edit with your settings

@@ -1,0 +1,23 @@
+# K8s Monitor MCP Server Requirements
+
+# MCP SDK
+mcp==1.0.0
+
+# Kubernetes Client
+kubernetes==31.0.0
+pyyaml==6.0.2
+
+# Async
+asyncio==3.4.3
+aiofiles==24.1.0
+
+# Logging
+structlog==24.4.0
+python-json-logger==3.2.1
+
+# Utilities
+python-dotenv==1.0.1
+tenacity==9.0.0
+
+# Monitoring
+prometheus-client==0.21.0

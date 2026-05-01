@@ -1,0 +1,32 @@
+# Actions MCP Server Requirements
+
+# MCP SDK
+mcp==1.0.0
+
+# Kubernetes Client
+kubernetes==31.0.0
+pyyaml==6.0.2
+
+# Async
+asyncio==3.4.3
+
+# Logging
+structlog==24.4.0
+python-json-logger==3.2.1
+
+# Utilities
+python-dotenv==1.0.1
+tenacity==9.0.0
+
+# Rate Limiting
+ratelimit==2.2.1
+
+# Circuit Breaker
+pybreaker==1.2.0
+
+# Validation
+jsonschema==4.23.0
+pydantic==2.10.3
+
+# Monitoring
+prometheus-client==0.21.0

@@ -1,0 +1,69 @@
+# Orchestrator Requirements
+
+# MCP SDK
+mcp==1.0.0
+
+# AI/LLM
+anthropic==0.39.0
+openai==1.54.0
+
+# Kubernetes
+kubernetes==31.0.0
+pyyaml==6.0.2
+
+# Database
+psycopg2-binary==2.9.10
+sqlalchemy==2.0.35
+
+# Redis
+redis==5.2.0
+hiredis==3.0.0
+
+# Web Framework
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+pydantic==2.10.3
+pydantic-settings==2.6.1
+
+# HTTP Client
+httpx==0.27.2
+aiohttp==3.11.7
+
+# Async
+asyncio==3.4.3
+aiofiles==24.1.0
+
+# Logging
+structlog==24.4.0
+python-json-logger==3.2.1
+
+# Utilities
+python-dotenv==1.0.1
+click==8.1.7
+rich==13.9.4
+tenacity==9.0.0
+
+# Workflow Management
+temporalio==1.7.1
+
+# Circuit Breaker
+pybreaker==1.2.0
+
+# Rate Limiting
+ratelimit==2.2.1
+
+# Monitoring
+prometheus-client==0.21.0
+opentelemetry-api==1.28.2
+opentelemetry-sdk==1.28.2
+opentelemetry-instrumentation-fastapi==0.49b2
+
+# Security
+cryptography==44.0.0
+python-jose[cryptography]==3.3.0
+
+# Validation
+jsonschema==4.23.0
+
+# Caching
+cachetools==5.5.0

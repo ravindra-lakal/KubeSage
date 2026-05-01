@@ -77,6 +77,33 @@ helm version
 
 ---
 
+### Python Dependencies
+
+Install all required Python packages:
+
+```bash
+# Install all dependencies at once
+pip install -r requirements.txt
+
+# Or install component-specific dependencies
+pip install -r orchestrator/requirements.txt
+pip install -r mcp-servers/k8s-monitor/requirements.txt
+pip install -r mcp-servers/metrics/requirements.txt
+pip install -r mcp-servers/detection/requirements.txt
+pip install -r mcp-servers/actions/requirements.txt
+pip install -r mcp-servers/knowledge-base/requirements.txt
+pip install -r mcp-servers/notifications/requirements.txt
+```
+
+**Key Dependencies**:
+- MCP SDK (1.0.0)
+- Anthropic Claude (0.39.0)
+- Kubernetes Client (31.0.0)
+- FastAPI (0.115.5)
+- ChromaDB (0.5.20)
+- Prometheus Client (0.21.0)
+
+
 ## Quick Start
 
 ### Local Development Deployment
